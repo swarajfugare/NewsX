@@ -1,0 +1,7 @@
+# Android App Signing Keystore Configuration Example
+# Copy to android/app/key.properties and replace with your actual keystore details
+
+storePassword=YourKeystorePasswordHere
+keyPassword=YourKeyPasswordHere
+keyAlias=upload
+storeFile=/Users/swarajfugare/keystores/newsx-release-key.jks

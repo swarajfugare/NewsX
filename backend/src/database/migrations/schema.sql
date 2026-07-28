@@ -1,0 +1,99 @@
+-- NewsX MySQL Hostinger Database Schema
+CREATE DATABASE IF NOT EXISTS newsx_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE newsx_db;
+
+-- 1. Users Table
+CREATE TABLE IF NOT EXISTS users (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  firebase_uid VARCHAR(128) UNIQUE NOT NULL,
+  name VARCHAR(100) NOT NULL,
+  email VARCHAR(150) UNIQUE NOT NULL,
+  phone VARCHAR(20) DEFAULT NULL,
+  photo TEXT DEFAULT NULL,
+  username VARCHAR(50) UNIQUE DEFAULT NULL,
+  bio TEXT DEFAULT NULL,
+  language VARCHAR(20) DEFAULT 'English',
+  theme VARCHAR(20) DEFAULT 'dark',
+  role ENUM('user', 'admin') DEFAULT 'user',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 2. Preferences Table
+CREATE TABLE IF NOT EXISTS preferences (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  user_id INT NOT NULL,
+  category VARCHAR(50) NOT NULL,
+  enabled TINYINT(1) DEFAULT 1,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 3. Categories Table
+CREATE TABLE IF NOT EXISTS categories (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(50) NOT NULL,
+  slug VARCHAR(50) UNIQUE NOT NULL,
+  icon VARCHAR(50) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 4. News Articles Table
+CREATE TABLE IF NOT EXISTS news_articles (
+  id VARCHAR(64) PRIMARY KEY,
+  title VARCHAR(255) NOT NULL,
+  summary TEXT NOT NULL,
+  image_url TEXT NOT NULL,
+  category VARCHAR(50) NOT NULL,
+  author VARCHAR(100) NOT NULL,
+  author_avatar TEXT NOT NULL,
+  published_at DATETIME NOT NULL,
+  read_time VARCHAR(20) DEFAULT '1 min',
+  language VARCHAR(20) DEFAULT 'English',
+  likes_count INT DEFAULT 0,
+  shares_count INT DEFAULT 0,
+  comments_count INT DEFAULT 0,
+  source_url TEXT DEFAULT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 5. Bookmarks Table
+CREATE TABLE IF NOT EXISTS bookmarks (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  user_id INT NOT NULL,
+  news_id VARCHAR(64) NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE KEY unique_user_bookmark (user_id, news_id),
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (news_id) REFERENCES news_articles(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 6. Likes Table
+CREATE TABLE IF NOT EXISTS likes (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  user_id INT NOT NULL,
+  news_id VARCHAR(64) NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE KEY unique_user_like (user_id, news_id),
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (news_id) REFERENCES news_articles(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 7. Shares Table
+CREATE TABLE IF NOT EXISTS shares (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  user_id INT NOT NULL,
+  news_id VARCHAR(64) NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (news_id) REFERENCES news_articles(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 8. Reading History Table
+CREATE TABLE IF NOT EXISTS history (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  user_id INT NOT NULL,
+  news_id VARCHAR(64) NOT NULL,
+  reading_time VARCHAR(20) DEFAULT '1 min',
+  opened_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (news_id) REFERENCES news_articles(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

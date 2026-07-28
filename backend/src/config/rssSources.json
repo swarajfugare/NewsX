@@ -1,0 +1,77 @@
+[
+  {
+    "category": "AI",
+    "name": "Wired AI",
+    "url": "https://www.wired.com/feed/category/business/latest/rss"
+  },
+  {
+    "category": "Technology",
+    "name": "TechCrunch",
+    "url": "https://techcrunch.com/feed/"
+  },
+  {
+    "category": "Technology",
+    "name": "The Verge",
+    "url": "https://www.theverge.com/rss/index.xml"
+  },
+  {
+    "category": "Business",
+    "name": "Bloomberg Markets",
+    "url": "https://feeds.bloomberg.com/markets/news.rss"
+  },
+  {
+    "category": "Finance",
+    "name": "Financial Times",
+    "url": "https://www.ft.com/rss/home/uk"
+  },
+  {
+    "category": "Startup",
+    "name": "Inc42",
+    "url": "https://inc42.com/feed/"
+  },
+  {
+    "category": "Sports",
+    "name": "ESPN News",
+    "url": "https://www.espn.com/espn/rss/news"
+  },
+  {
+    "category": "Cricket",
+    "name": "ESPN Cricinfo",
+    "url": "https://www.espncricinfo.com/rss/content/story/feeds/6.xml"
+  },
+  {
+    "category": "World",
+    "name": "BBC World",
+    "url": "http://feeds.bbci.co.uk/news/world/rss.xml"
+  },
+  {
+    "category": "India",
+    "name": "NDTV Top Stories",
+    "url": "https://feeds.feedburner.com/ndtvnews-top-stories"
+  },
+  {
+    "category": "Science",
+    "name": "NASA Breaking News",
+    "url": "https://www.nasa.gov/rss/dyn/breaking_news.rss"
+  },
+  {
+    "category": "Health",
+    "name": "Medical News Today",
+    "url": "https://www.medicalnewstoday.com/feed"
+  },
+  {
+    "category": "Entertainment",
+    "name": "Variety News",
+    "url": "https://variety.com/feed/"
+  },
+  {
+    "category": "Education",
+    "name": "EdSurge News",
+    "url": "https://www.edsurge.com/articles_rss"
+  },
+  {
+    "category": "Maharashtra",
+    "name": "Lokmat News",
+    "url": "https://www.lokmat.com/rss/maharashtra.xml"
+  }
+]

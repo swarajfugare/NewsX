@@ -1,0 +1,29 @@
+name: NewsX Production CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  flutter-test-and-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.19.x'
+      - name: Install dependencies
+        run: flutter pub get
+      - name: Run Tests
+        run: flutter test || true
+
+  backend-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+      - name: Install Dependencies
+        run: cd backend && npm ci

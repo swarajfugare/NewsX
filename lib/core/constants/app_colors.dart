@@ -42,8 +42,8 @@ class AppColors {
   static const Color lightBorder = Color(0xFFE2E8F0);
 
   // Glassmorphism Overlay Colors
-  static Color darkGlassOverlay = Colors.black.withOpacity(0.4);
-  static Color lightGlassOverlay = Colors.white.withOpacity(0.7);
+  static Color darkGlassOverlay = Colors.black.withValues(alpha: 0.4);
+  static Color lightGlassOverlay = Colors.white.withValues(alpha: 0.7);
 
   // Gradients
   static const LinearGradient primaryGradient = LinearGradient(

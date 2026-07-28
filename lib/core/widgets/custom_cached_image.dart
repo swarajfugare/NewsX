@@ -41,7 +41,7 @@ class CustomCachedImage extends StatelessWidget {
         height: height,
         color: isDark ? AppColors.darkSurfaceVariant : AppColors.lightSurfaceVariant,
         child: Column(
-          mainAxisAlignment: MainAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
               Icons.broken_image_rounded,

@@ -34,14 +34,14 @@ class WelcomeScreen extends StatelessWidget {
                   borderRadius: BorderRadius.circular(24),
                   boxShadow: [
                     BoxShadow(
-                      color: AppColors.primary.withOpacity(0.3),
+                      color: AppColors.primary.withValues(alpha: 0.3),
                       blurRadius: 20,
                       offset: const Offset(0, 6),
                     ),
                   ],
                 ),
                 child: const Icon(Icons.bolt_rounded, size: 44, color: Colors.white),
-              ).animate().scale(duration: 600.ms, curve: Curves.outBack),
+              ).animate().scale(duration: 600.ms, curve: Curves.easeOutBack),
               const SizedBox(height: 24),
               Text(
                 'Welcome to ${AppConstants.appName}',

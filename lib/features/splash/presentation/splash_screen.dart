@@ -43,7 +43,7 @@ class _SplashScreenState extends State<SplashScreen> {
         ),
         child: SafeArea(
           child: Column(
-            mainAxisAlignment: MainAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               const Spacer(),
               // Animated Logo Icon
@@ -55,7 +55,7 @@ class _SplashScreenState extends State<SplashScreen> {
                   borderRadius: BorderRadius.circular(28),
                   boxShadow: [
                     BoxShadow(
-                      color: AppColors.primary.withOpacity(0.4),
+                      color: AppColors.primary.withValues(alpha: 0.4),
                       blurRadius: 24,
                       offset: const Offset(0, 8),
                     ),
@@ -91,9 +91,9 @@ class _SplashScreenState extends State<SplashScreen> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.1),
+                  color: Colors.white.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: Colors.white.withOpacity(0.15)),
+                  border: Border.all(color: Colors.white.withValues(alpha: 0.15)),
                 ),
                 child: Text(
                   AppConstants.appTagline,
@@ -118,7 +118,7 @@ class _SplashScreenState extends State<SplashScreen> {
                 'v${AppConstants.appVersion}',
                 style: TextStyle(
                   fontSize: 12,
-                  color: Colors.white.withOpacity(0.4),
+                  color: Colors.white.withValues(alpha: 0.4),
                 ),
               ),
               const SizedBox(height: 16),

@@ -77,7 +77,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
               child: Row(
-                mainAxisAlignment: MainAlignment.spaceBetween,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   const Text(
                     'NewsX',
@@ -114,7 +114,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   return Padding(
                     padding: const EdgeInsets.all(24),
                     child: Column(
-                      mainAxisAlignment: MainAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         // Animated Hero Card Graphic
                         Container(
@@ -122,9 +122,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           height: 200,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            color: item.accentColor.withOpacity(0.12),
+                            color: item.accentColor.withValues(alpha: 0.12),
                             border: Border.all(
-                              color: item.accentColor.withOpacity(0.3),
+                              color: item.accentColor.withValues(alpha: 0.3),
                               width: 2,
                             ),
                           ),
@@ -137,7 +137,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           ),
                         )
                             .animate(key: ValueKey(index))
-                            .scale(duration: 500.ms, curve: Curves.outBack)
+                            .scale(duration: 500.ms, curve: Curves.easeOutBack)
                             .fadeIn(),
                         const SizedBox(height: 40),
                         Text(
@@ -176,7 +176,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 children: [
                   // Indicators
                   Row(
-                    mainAxisAlignment: MainAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: List.generate(
                       _pages.length,
                       (index) => AnimatedContainer(

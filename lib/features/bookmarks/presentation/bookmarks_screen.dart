@@ -17,7 +17,6 @@ class BookmarksScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final bookmarkedIds = ref.watch(bookmarksProvider);
     final allArticles = ref.watch(rawNewsArticlesProvider);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     final savedArticles =
         allArticles.where((a) => bookmarkedIds.contains(a.id)).toList();

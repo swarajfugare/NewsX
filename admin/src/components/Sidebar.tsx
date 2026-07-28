@@ -1,6 +1,6 @@
 import React from 'react';
 import { Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Typography, Box } from '@mui/material';
-import { LayoutDashboard, Newspaper, Category, Rss, Cpu, Users, Bell, LogOut } from 'lucide-react';
+import { LayoutDashboard, Newspaper, FolderTree, Rss, Cpu, Users, Bell, LogOut } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 const drawerWidth = 260;
@@ -8,7 +8,7 @@ const drawerWidth = 260;
 const navItems = [
   { text: 'Dashboard', icon: <LayoutDashboard size={20} />, path: '/' },
   { text: 'News Manager', icon: <Newspaper size={20} />, path: '/news' },
-  { text: 'Categories', icon: <Category size={20} />, path: '/categories' },
+  { text: 'Categories', icon: <FolderTree size={20} />, path: '/categories' },
   { text: 'RSS Feeds', icon: <Rss size={20} />, path: '/rss' },
   { text: 'AI Engine Monitor', icon: <Cpu size={20} />, path: '/ai' },
   { text: 'Users & Roles', icon: <Users size={20} />, path: '/users' },

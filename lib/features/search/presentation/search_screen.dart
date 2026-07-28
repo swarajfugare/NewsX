@@ -7,7 +7,6 @@ import '../../../core/utils/date_formatter.dart';
 import '../../../core/widgets/custom_cached_image.dart';
 import '../../../core/widgets/custom_search_bar.dart';
 import '../../../core/widgets/empty_state_widget.dart';
-import '../../../core/widgets/section_header.dart';
 import '../../../models/news_article.dart';
 import '../../../providers/search_provider.dart';
 
@@ -72,7 +71,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                         // Recent Searches
                         if (recentSearches.isNotEmpty) ...[
                           Row(
-                            mainAxisAlignment: MainAlignment.spaceBetween,
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text(
                                 'Recent Searches',
@@ -89,7 +88,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                                   ref.read(recentSearchesProvider.notifier).state = [];
                                 },
                                 child: const Text('Clear All'),
-                              ),
+                               ),
                             ],
                           ),
                           Wrap(
@@ -195,7 +194,7 @@ class _SearchResultCard extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                     decoration: BoxDecoration(
-                      color: AppColors.primary.withOpacity(0.15),
+                      color: AppColors.primary.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(

@@ -31,7 +31,7 @@ class CustomButton extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     Widget childContent = Row(
-      mainAxisAlignment: MainAlignment.center,
+      mainAxisAlignment: MainAxisAlignment.center,
       mainAxisSize: MainAxisSize.min,
       children: [
         if (isLoading)
@@ -72,7 +72,7 @@ class CustomButton extends StatelessWidget {
               ? []
               : [
                   BoxShadow(
-                    color: AppColors.primary.withOpacity(0.35),
+                    color: AppColors.primary.withValues(alpha: 0.35),
                     blurRadius: 12,
                     offset: const Offset(0, 4),
                   ),
@@ -117,10 +117,10 @@ class CustomButton extends StatelessWidget {
         width: width ?? double.infinity,
         height: height,
         decoration: BoxDecoration(
-          color: (isDark ? Colors.white : Colors.black).withOpacity(0.08),
+          color: (isDark ? Colors.white : Colors.black).withValues(alpha: 0.08),
           borderRadius: effectiveRadius,
           border: Border.all(
-            color: (isDark ? Colors.white : Colors.black).withOpacity(0.15),
+            color: (isDark ? Colors.white : Colors.black).withValues(alpha: 0.15),
           ),
         ),
         child: Material(

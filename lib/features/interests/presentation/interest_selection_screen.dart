@@ -31,8 +31,8 @@ class InterestSelectionScreen extends ConsumerWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                 decoration: BoxDecoration(
                   color: isValid
-                      ? AppColors.accentEmerald.withOpacity(0.2)
-                      : AppColors.accentAmber.withOpacity(0.2),
+                      ? AppColors.accentEmerald.withValues(alpha: 0.2)
+                      : AppColors.accentAmber.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(

@@ -19,22 +19,20 @@ class MainWrapperScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
     return Scaffold(
       body: navigationShell,
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.1),
+              color: Colors.black.withValues(alpha: 0.1),
               blurRadius: 10,
               offset: const Offset(0, -2),
             ),
           ],
         ),
         child: NavigationBar(
-          currentIndex: navigationShell.currentIndex,
+          selectedIndex: navigationShell.currentIndex,
           onDestinationSelected: _onTap,
           destinations: const [
             NavigationDestination(

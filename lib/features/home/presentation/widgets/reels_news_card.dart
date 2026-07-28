@@ -52,7 +52,7 @@ class _ReelsNewsCardState extends State<ReelsNewsCard> {
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: AppColors.primary.withOpacity(0.2),
+                      color: AppColors.primary.withValues(alpha: 0.2),
                       shape: BoxShape.circle,
                     ),
                     child: const Icon(Icons.psychology_rounded, color: AppColors.primary, size: 24),
@@ -72,16 +72,16 @@ class _ReelsNewsCardState extends State<ReelsNewsCard> {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.06),
+                  color: Colors.white.withValues(alpha: 0.06),
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: Colors.white.withOpacity(0.12)),
+                  border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
                 ),
                 child: Text(
                   widget.article.whyItMatters ?? 'Key technological shift driving next-generation AI workflows.',
                   style: const TextStyle(
                     fontSize: 15,
                     height: 1.45,
-                    color: Colors.white90,
+                    color: Color(0xE6FFFFFF),
                   ),
                 ),
               ),
@@ -90,7 +90,7 @@ class _ReelsNewsCardState extends State<ReelsNewsCard> {
                 spacing: 8,
                 children: widget.article.tags.map((tag) {
                   return Chip(
-                    backgroundColor: AppColors.primary.withOpacity(0.15),
+                    backgroundColor: AppColors.primary.withValues(alpha: 0.15),
                     label: Text('#$tag', style: const TextStyle(color: AppColors.secondary, fontSize: 12)),
                   );
                 }).toList(),
@@ -132,7 +132,7 @@ class _ReelsNewsCardState extends State<ReelsNewsCard> {
             left: 20,
             right: 20,
             child: Row(
-              mainAxisAlignment: MainAlignment.spaceBetween,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 // Category Chip
                 Container(
@@ -142,7 +142,7 @@ class _ReelsNewsCardState extends State<ReelsNewsCard> {
                     borderRadius: BorderRadius.circular(20),
                     boxShadow: [
                       BoxShadow(
-                        color: AppColors.primary.withOpacity(0.4),
+                        color: AppColors.primary.withValues(alpha: 0.4),
                         blurRadius: 10,
                       ),
                     ],
@@ -161,9 +161,9 @@ class _ReelsNewsCardState extends State<ReelsNewsCard> {
                 Container(
                   padding: const EdgeInsets.all(3),
                   decoration: BoxDecoration(
-                    color: Colors.black.withOpacity(0.6),
+                    color: Colors.black.withValues(alpha: 0.6),
                     borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: Colors.white.withOpacity(0.2)),
+                    border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
                   ),
                   child: Row(
                     children: ['EN', 'HI', 'MR'].map((langCode) {
@@ -291,14 +291,14 @@ class _ReelsNewsCardState extends State<ReelsNewsCard> {
                       Container(
                         padding: const EdgeInsets.all(14),
                         decoration: BoxDecoration(
-                          color: Colors.black.withOpacity(0.45),
+                          color: Colors.black.withValues(alpha: 0.45),
                           borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: Colors.white.withOpacity(0.15)),
+                          border: Border.all(color: Colors.white.withValues(alpha: 0.15)),
                         ),
                         child: Text(
                           displaySummary,
                           style: const TextStyle(
-                            color: Colors.white90,
+                            color: Color(0xE6FFFFFF),
                             fontSize: 14,
                             height: 1.45,
                             letterSpacing: 0.1,

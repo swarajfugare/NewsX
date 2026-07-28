@@ -1,7 +1,5 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../core/constants/app_colors.dart';
 import '../../../core/widgets/category_chip.dart';
 import '../../../core/widgets/loading_skeleton.dart';
 import '../../../providers/bookmarks_provider.dart';

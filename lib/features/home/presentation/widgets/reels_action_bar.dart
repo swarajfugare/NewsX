@@ -89,8 +89,8 @@ class _ActionButton extends StatelessWidget {
       height: 48,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: Colors.black.withOpacity(0.4),
-        border: Border.all(color: Colors.white.withOpacity(0.2)),
+        color: Colors.black.withValues(alpha: 0.4),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
       ),
       child: Icon(icon, color: iconColor, size: 24),
     );

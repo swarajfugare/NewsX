@@ -13,6 +13,7 @@ Thumbs.db
 tmp/
 logs/
 *.log
+*.hprof
 
 # --- Secrets, Credentials & Environment Configs ---
 .env

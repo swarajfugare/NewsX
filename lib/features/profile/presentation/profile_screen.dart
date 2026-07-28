@@ -129,7 +129,7 @@ class ProfileScreen extends ConsumerWidget {
                   ),
                 ),
                 child: Row(
-                  mainAxisAlignment: MainAlignment.spaceAround,
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
                     _StatItem(
                       label: 'Streak',

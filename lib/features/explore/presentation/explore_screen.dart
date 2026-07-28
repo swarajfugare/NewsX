@@ -15,7 +15,6 @@ class ExploreScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final articles = ref.watch(rawNewsArticlesProvider);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     final heroArticle = articles.first;
     final gridArticles = articles.skip(1).toList();
@@ -50,7 +49,7 @@ class ExploreScreen extends ConsumerWidget {
                     borderRadius: BorderRadius.circular(24),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.15),
+                        color: Colors.black.withValues(alpha: 0.15),
                         blurRadius: 16,
                         offset: const Offset(0, 4),
                       ),
@@ -69,7 +68,7 @@ class ExploreScreen extends ConsumerWidget {
                           gradient: LinearGradient(
                             colors: [
                               Colors.transparent,
-                              Colors.black.withOpacity(0.85),
+                              Colors.black.withValues(alpha: 0.85),
                             ],
                             begin: Alignment.topCenter,
                             end: Alignment.bottomCenter,
@@ -206,7 +205,7 @@ class _ExploreGridTile extends StatelessWidget {
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                       decoration: BoxDecoration(
-                        color: Colors.black.withOpacity(0.65),
+                        color: Colors.black.withValues(alpha: 0.65),
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: Text(
@@ -239,7 +238,7 @@ class _ExploreGridTile extends StatelessWidget {
                   ),
                   const SizedBox(height: 6),
                   Row(
-                    mainAxisAlignment: MainAlignment.spaceBetween,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
                         article.author,
@@ -250,7 +249,7 @@ class _ExploreGridTile extends StatelessWidget {
                       ),
                       Row(
                         children: [
-                          Icon(
+                          const Icon(
                             Icons.favorite_rounded,
                             size: 12,
                             color: AppColors.accentRose,

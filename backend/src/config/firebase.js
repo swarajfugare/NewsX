@@ -14,11 +14,11 @@ try {
     });
     logger.info('🔥 Firebase Admin SDK initialized via environment credentials');
   } else {
-    // Default App Initialization using Google Application Default Credentials or standard configuration
+    // Default App Initialization using real Project ID
     firebaseApp = admin.initializeApp({
-      projectId: process.env.FIREBASE_PROJECT_ID || 'newsx-app',
+      projectId: process.env.FIREBASE_PROJECT_ID || 'news-4053a',
     });
-    logger.info('🔥 Firebase Admin SDK initialized with default Project ID');
+    logger.info('🔥 Firebase Admin SDK initialized with Project ID: news-4053a');
   }
 } catch (e) {
   if (!admin.apps.length) {

@@ -1,4 +1,4 @@
-package com.newsx.app
+package com.refixer.newsx
 
 import io.flutter.embedding.android.FlutterActivity
 

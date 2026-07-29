@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "com.newsx.app"
+    namespace = "com.refixer.newsx"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -20,7 +20,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.newsx.app"
+        applicationId = "com.refixer.newsx"
         minSdk = 26
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode

@@ -32,37 +32,37 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyA_NewsX_Web_ApiKey_2026_Sample',
-    appId: '1:102938475610:web:8a9b0c1d2e3f4a5b6c7d',
-    messagingSenderId: '102938475610',
-    projectId: 'newsx-app',
-    authDomain: 'newsx-app.firebaseapp.com',
-    storageBucket: 'newsx-app.appspot.com',
+    apiKey: 'AIzaSyBr85DhSImmIYqx46Hu5f854j5ekph9jxU',
+    appId: '1:69418373397:web:fa0e73ea227fec6254991c',
+    messagingSenderId: '69418373397',
+    projectId: 'news-4053a',
+    authDomain: 'news-4053a.firebaseapp.com',
+    storageBucket: 'news-4053a.firebasestorage.app',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyB_NewsX_Android_ApiKey_2026_Sample',
-    appId: '1:102938475610:android:9f8e7d6c5b4a3f2e1d',
-    messagingSenderId: '102938475610',
-    projectId: 'newsx-app',
-    storageBucket: 'newsx-app.appspot.com',
+    apiKey: 'AIzaSyBr85DhSImmIYqx46Hu5f854j5ekph9jxU',
+    appId: '1:69418373397:android:fa0e73ea227fec6254991c',
+    messagingSenderId: '69418373397',
+    projectId: 'news-4053a',
+    storageBucket: 'news-4053a.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyC_NewsX_IOS_ApiKey_2026_Sample',
-    appId: '1:102938475610:ios:7f6e5d4c3b2a1f0e9d',
-    messagingSenderId: '102938475610',
-    projectId: 'newsx-app',
-    storageBucket: 'newsx-app.appspot.com',
-    iosBundleId: 'com.newsx.app',
+    apiKey: 'AIzaSyBr85DhSImmIYqx46Hu5f854j5ekph9jxU',
+    appId: '1:69418373397:ios:fa0e73ea227fec6254991c',
+    messagingSenderId: '69418373397',
+    projectId: 'news-4053a',
+    storageBucket: 'news-4053a.firebasestorage.app',
+    iosBundleId: 'com.refixer.newsx',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'AIzaSyC_NewsX_IOS_ApiKey_2026_Sample',
-    appId: '1:102938475610:ios:7f6e5d4c3b2a1f0e9d',
-    messagingSenderId: '102938475610',
-    projectId: 'newsx-app',
-    storageBucket: 'newsx-app.appspot.com',
-    iosBundleId: 'com.newsx.app',
+    apiKey: 'AIzaSyBr85DhSImmIYqx46Hu5f854j5ekph9jxU',
+    appId: '1:69418373397:ios:fa0e73ea227fec6254991c',
+    messagingSenderId: '69418373397',
+    projectId: 'news-4053a',
+    storageBucket: 'news-4053a.firebasestorage.app',
+    iosBundleId: 'com.refixer.newsx',
   );
 }

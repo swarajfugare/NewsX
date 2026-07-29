@@ -13,6 +13,8 @@
     @com.google.gson.annotations.SerializedName <fields>;
 }
 
-# Ignore R8 warning rules for third party libraries
+# Ignore R8 warnings for Play Core deferred components and third party libraries
+-dontwarn com.google.android.play.core.**
+-dontwarn io.flutter.embedding.engine.deferredcomponents.**
 -dontwarn okhttp3.**
 -dontwarn retrofit2.**

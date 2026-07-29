@@ -3,6 +3,7 @@ class AppConstants {
   static const String appTagline = 'AI Powered Smart News';
   static const String appVersion = '6.0.0';
   static const String buildNumber = '100';
+  static const String apiBaseUrl = 'http://localhost:5000/api/v1';
   static const int minInterestsRequired = 3;
   static const Duration splashDelay = Duration(seconds: 2);
   static const String defaultUserAvatar =

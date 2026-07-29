@@ -2,13 +2,21 @@ const { query } = require('../config/database');
 
 class UserRepository {
   static async findByFirebaseUid(uid) {
-    const rows = await query(`SELECT * FROM users WHERE firebase_uid = ?`, [uid]);
-    return rows[0] || null;
+    try {
+      const rows = await query(`SELECT * FROM users WHERE firebase_uid = ?`, [uid]);
+      return rows[0] || null;
+    } catch (_) {
+      return null;
+    }
   }
 
   static async findById(id) {
-    const rows = await query(`SELECT * FROM users WHERE id = ?`, [id]);
-    return rows[0] || null;
+    try {
+      const rows = await query(`SELECT * FROM users WHERE id = ?`, [id]);
+      return rows[0] || null;
+    } catch (_) {
+      return null;
+    }
   }
 
   static async createUser({ firebaseUid, name, email, photo, phone = null }) {
@@ -17,6 +25,19 @@ class UserRepository {
       [firebaseUid, name, email, photo, phone]
     );
     return this.findById(result.insertId);
+  }
+
+  static async upsertUser({ firebaseUid, name, email, photo, phone = null }) {
+    const existing = await this.findByFirebaseUid(firebaseUid);
+    if (existing) {
+      await query(
+        `UPDATE users SET name = COALESCE(?, name), photo = COALESCE(?, photo), email = COALESCE(?, email), updated_at = CURRENT_TIMESTAMP WHERE firebase_uid = ?`,
+        [name, photo, email, firebaseUid]
+      );
+      return this.findByFirebaseUid(firebaseUid);
+    } else {
+      return this.createUser({ firebaseUid, name, email, photo, phone });
+    }
   }
 
   static async updateProfile(id, { name, bio, language, theme, photo }) {
@@ -28,17 +49,23 @@ class UserRepository {
   }
 
   static async getPreferences(userId) {
-    return query(`SELECT category, enabled FROM preferences WHERE user_id = ?`, [userId]);
+    try {
+      return await query(`SELECT category, enabled FROM preferences WHERE user_id = ?`, [userId]);
+    } catch (_) {
+      return [];
+    }
   }
 
   static async updatePreferences(userId, categories) {
-    await query(`DELETE FROM preferences WHERE user_id = ?`, [userId]);
-    for (const cat of categories) {
-      await query(
-        `INSERT INTO preferences (user_id, category, enabled) VALUES (?, ?, 1)`,
-        [userId, cat]
-      );
-    }
+    try {
+      await query(`DELETE FROM preferences WHERE user_id = ?`, [userId]);
+      for (const cat of categories) {
+        await query(
+          `INSERT INTO preferences (user_id, category, enabled) VALUES (?, ?, 1)`,
+          [userId, cat]
+        );
+      }
+    } catch (_) {}
     return this.getPreferences(userId);
   }
 }

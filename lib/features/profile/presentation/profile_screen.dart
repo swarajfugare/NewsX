@@ -5,6 +5,7 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/router/route_names.dart';
 import '../../../core/widgets/custom_button.dart';
 import '../../../core/widgets/section_header.dart';
+import '../../../providers/auth_provider.dart';
 import '../../../providers/bookmarks_provider.dart';
 import '../../../providers/news_provider.dart';
 import '../../../providers/profile_provider.dart';
@@ -45,10 +46,15 @@ class ProfileScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final user = ref.watch(profileProvider);
+    final userProfile = ref.watch(profileProvider);
+    final authState = ref.watch(authProvider);
     final bookmarks = ref.watch(bookmarksProvider);
     final recentArticles = ref.watch(rawNewsArticlesProvider).take(4).toList();
     final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    final displayName = authState.firebaseUser?.displayName ?? authState.userProfile?['name'] as String? ?? userProfile.name;
+    final displayEmail = authState.firebaseUser?.email ?? authState.userProfile?['email'] as String? ?? userProfile.email;
+    final displayPhoto = authState.firebaseUser?.photoURL ?? authState.userProfile?['photo'] as String? ?? userProfile.avatarUrl;
 
     return Scaffold(
       appBar: AppBar(
@@ -71,7 +77,7 @@ class ProfileScreen extends ConsumerWidget {
                 children: [
                   CircleAvatar(
                     radius: 46,
-                    backgroundImage: NetworkImage(user.avatarUrl),
+                    backgroundImage: NetworkImage(displayPhoto.isNotEmpty ? displayPhoto : userProfile.avatarUrl),
                   ),
                   Positioned(
                     bottom: 0,
@@ -90,7 +96,7 @@ class ProfileScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 12),
             Text(
-              user.name,
+              displayName,
               style: TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
@@ -99,7 +105,7 @@ class ProfileScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 4),
             Text(
-              user.email,
+              displayEmail,
               style: TextStyle(
                 fontSize: 13,
                 color: isDark ? AppColors.darkTextMuted : AppColors.lightTextMuted,
@@ -108,11 +114,28 @@ class ProfileScreen extends ConsumerWidget {
             const SizedBox(height: 16),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: CustomButton(
-                label: 'Edit Profile',
-                variant: CustomButtonVariant.outlined,
-                height: 44,
-                onPressed: () => _showEditProfileDialog(context, ref, user.name),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: CustomButton(
+                      label: 'Edit Profile',
+                      variant: CustomButtonVariant.outlined,
+                      height: 44,
+                      onPressed: () => _showEditProfileDialog(context, ref, displayName),
+                    ),
+                  ),
+                  if (authState.isAuthenticated) ...[
+                    const SizedBox(width: 12),
+                    IconButton(
+                      icon: const Icon(Icons.logout_rounded, color: AppColors.accentRose),
+                      tooltip: 'Logout',
+                      onPressed: () async {
+                        await ref.read(authProvider.notifier).logout();
+                        if (context.mounted) context.go(RouteNames.welcome);
+                      },
+                    ),
+                  ],
+                ],
               ),
             ),
             const SizedBox(height: 24),
@@ -133,7 +156,7 @@ class ProfileScreen extends ConsumerWidget {
                   children: [
                     _StatItem(
                       label: 'Streak',
-                      value: '🔥 ${user.streakDays} Days',
+                      value: '🔥 ${userProfile.streakDays} Days',
                       accentColor: AppColors.accentAmber,
                     ),
                     Container(
@@ -143,7 +166,7 @@ class ProfileScreen extends ConsumerWidget {
                     ),
                     _StatItem(
                       label: 'Read',
-                      value: '${user.totalArticlesRead}',
+                      value: '${userProfile.totalArticlesRead}',
                       accentColor: AppColors.primary,
                     ),
                     Container(

@@ -1,21 +1,148 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/router/route_names.dart';
 import '../../../core/widgets/custom_button.dart';
+import '../../../providers/auth_provider.dart';
 
-class WelcomeScreen extends StatelessWidget {
+class WelcomeScreen extends ConsumerStatefulWidget {
   const WelcomeScreen({super.key});
 
-  void _navigateToInterests(BuildContext context) {
-    context.go(RouteNames.interests);
+  @override
+  ConsumerState<WelcomeScreen> createState() => _WelcomeScreenState();
+}
+
+class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _nameController = TextEditingController();
+  bool _isSignUp = false;
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    _nameController.dispose();
+    super.dispose();
+  }
+
+  void _navigateToInterests() {
+    if (mounted) context.go(RouteNames.interests);
+  }
+
+  Future<void> _handleGoogleSignIn() async {
+    final success = await ref.read(authProvider.notifier).signInWithGoogle();
+    if (success && mounted) {
+      _navigateToInterests();
+    }
+  }
+
+  void _showEmailAuthDialog() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            return Padding(
+              padding: EdgeInsets.only(
+                left: 24,
+                right: 24,
+                top: 24,
+                bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    _isSignUp ? 'Create NewsX Account' : 'Welcome Back to NewsX',
+                    style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 16),
+                  if (_isSignUp) ...[
+                    TextField(
+                      controller: _nameController,
+                      decoration: InputDecoration(
+                        labelText: 'Full Name',
+                        prefixIcon: const Icon(Icons.person_outline_rounded),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                  ],
+                  TextField(
+                    controller: _emailController,
+                    keyboardType: TextInputType.emailAddress,
+                    decoration: InputDecoration(
+                      labelText: 'Email Address',
+                      prefixIcon: const Icon(Icons.email_outlined),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: _passwordController,
+                    obscureText: true,
+                    decoration: InputDecoration(
+                      labelText: 'Password',
+                      prefixIcon: const Icon(Icons.lock_outline_rounded),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  CustomButton(
+                    label: _isSignUp ? 'Sign Up with Email' : 'Sign In',
+                    variant: CustomButtonVariant.gradient,
+                    onPressed: () async {
+                      final email = _emailController.text.trim();
+                      final password = _passwordController.text.trim();
+                      if (email.isEmpty || password.isEmpty) return;
+
+                      Navigator.pop(context);
+                      bool ok = false;
+                      if (_isSignUp) {
+                        ok = await ref.read(authProvider.notifier).registerWithEmail(email, password, _nameController.text.trim());
+                      } else {
+                        ok = await ref.read(authProvider.notifier).loginWithEmail(email, password);
+                      }
+                      if (ok && mounted) _navigateToInterests();
+                    },
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(_isSignUp ? 'Already have an account?' : "Don't have an account?"),
+                      TextButton(
+                        onPressed: () {
+                          setModalState(() {
+                            _isSignUp = !_isSignUp;
+                          });
+                        },
+                        child: Text(_isSignUp ? 'Sign In' : 'Sign Up'),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final authState = ref.watch(authProvider);
 
     return Scaffold(
       body: SafeArea(
@@ -62,27 +189,27 @@ class WelcomeScreen extends StatelessWidget {
                 ),
               ).animate().fadeIn(delay: 200.ms).slideY(begin: 0.2, end: 0),
               const Spacer(),
-              // Social Login Actions
+              // Social & Email Login Actions
               Column(
                 children: [
                   CustomButton(
-                    label: 'Continue with Google',
+                    label: authState.isLoading ? 'Authenticating...' : 'Continue with Google',
                     icon: Icons.g_mobiledata_rounded,
                     variant: CustomButtonVariant.outlined,
-                    onPressed: () => _navigateToInterests(context),
+                    onPressed: authState.isLoading ? null : _handleGoogleSignIn,
                   ),
                   const SizedBox(height: 12),
                   CustomButton(
                     label: 'Continue with Email',
                     icon: Icons.email_rounded,
                     variant: CustomButtonVariant.outlined,
-                    onPressed: () => _navigateToInterests(context),
+                    onPressed: authState.isLoading ? null : _showEmailAuthDialog,
                   ),
                   const SizedBox(height: 12),
                   CustomButton(
                     label: 'Continue as Guest',
                     variant: CustomButtonVariant.gradient,
-                    onPressed: () => _navigateToInterests(context),
+                    onPressed: () => _navigateToInterests(),
                   ),
                 ],
               ).animate().fadeIn(delay: 400.ms).slideY(begin: 0.3, end: 0),

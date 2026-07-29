@@ -15,20 +15,36 @@ const adminRoutes = require('./adminRoutes');
 const healthRoutes = require('./healthRoutes');
 const { authenticateToken } = require('../middlewares/authMiddleware');
 
+// API Version 1 Discovery Root Endpoint
+router.get('/', (req, res) => {
+  res.status(200).json({
+    version: 'v1',
+    status: 'Active',
+    routes: [
+      '/news',
+      '/categories',
+      '/auth',
+      '/users',
+      '/search',
+      '/bookmarks'
+    ]
+  });
+});
+
+// Public Unauthenticated Endpoints
 router.use('/auth', authRoutes);
 router.use('/health', healthRoutes);
-
-// Apply authenticateToken middleware to user and news interaction routes
-router.use(authenticateToken);
 router.use('/news', personalisationRoutes);
 router.use('/news', newsEngineRoutes);
-router.use('/admin', adminRoutes);
-router.use('/user', userRoutes);
-router.use('/bookmarks', bookmarkRoutes);
-router.use('/likes', likeRoutes);
-router.use('/shares', shareRoutes);
-router.use('/history', historyRoutes);
 router.use('/categories', categoryRoutes);
 router.use('/search', searchRoutes);
+
+// Protected User Endpoints requiring JWT Auth
+router.use('/user', authenticateToken, userRoutes);
+router.use('/bookmarks', authenticateToken, bookmarkRoutes);
+router.use('/likes', authenticateToken, likeRoutes);
+router.use('/shares', authenticateToken, shareRoutes);
+router.use('/history', authenticateToken, historyRoutes);
+router.use('/admin', authenticateToken, adminRoutes);
 
 module.exports = router;

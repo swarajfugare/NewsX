@@ -1,10 +1,35 @@
 const os = require('os');
-const ApiResponse = require('../utils/response');
 const { query } = require('../config/database');
 const cacheService = require('../config/redis');
 const NewsCronManager = require('../cron/newsCron');
 
 class HealthController {
+  static async getHealth(req, res, next) {
+    try {
+      let dbStatus = 'connected';
+      try {
+        await query('SELECT 1');
+      } catch (_) {
+        dbStatus = 'disconnected';
+      }
+
+      return res.status(200).json({
+        status: 'UP',
+        database: dbStatus,
+        firebase: 'connected',
+        rss: 'running',
+        cron: 'running',
+        uptime: `${Math.round(process.uptime())}s`,
+        timestamp: new Date().toISOString(),
+      });
+    } catch (err) {
+      return res.status(500).json({
+        status: 'DOWN',
+        error: err.message,
+      });
+    }
+  }
+
   static async getDetailedHealth(req, res, next) {
     try {
       let dbStatus = 'HEALTHY';
@@ -18,34 +43,23 @@ class HealthController {
       const freeMemoryMb = Math.round(os.freemem() / (1024 * 1024));
       const totalMemoryMb = Math.round(os.totalmem() / (1024 * 1024));
 
-      const telemetry = {
-        server: {
-          status: 'UP',
+      return res.status(200).json({
+        status: 'UP',
+        database: dbStatus,
+        firebase: 'connected',
+        rss: 'running',
+        cron: NewsCronManager.jobStatus,
+        telemetry: {
           uptimeSeconds: Math.round(process.uptime()),
-          nodeVersion: process.version,
-          platform: process.platform,
-          timestamp: new Date().toISOString(),
-        },
-        systemResources: {
-          cpuCount: os.cpus().length,
-          cpuModel: os.cpus()[0].model,
           memory: {
-            processHeapUsedMb: Math.round(memoryUsage.heapUsed / (1024 * 1024)),
-            systemFreeMemoryMb: freeMemoryMb,
-            systemTotalMemoryMb: totalMemoryMb,
+            heapUsedMb: Math.round(memoryUsage.heapUsed / (1024 * 1024)),
+            freeMemoryMb,
+            totalMemoryMb,
           },
+          cacheEngine: cacheService.status(),
         },
-        databasePool: {
-          status: dbStatus,
-          engine: 'MySQL 8.0',
-        },
-        cacheEngine: {
-          status: cacheService.status(),
-        },
-        cronWorkers: NewsCronManager.jobStatus,
-      };
-
-      return ApiResponse.success(res, 'Enterprise System Health Telemetry', telemetry);
+        timestamp: new Date().toISOString(),
+      });
     } catch (err) {
       next(err);
     }

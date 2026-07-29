@@ -1,18 +1,33 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../core/constants/app_constants.dart';
 import '../models/user_profile.dart';
+import 'auth_provider.dart';
 
 class ProfileNotifier extends StateNotifier<UserProfile> {
   ProfileNotifier()
       : super(const UserProfile(
-          id: 'usr_99',
-          name: 'Alex Morgan',
-          email: 'alex.morgan@newsx.ai',
+          id: 'usr_guest',
+          name: 'News Reader',
+          email: 'reader@newsx.ai',
           avatarUrl: AppConstants.defaultUserAvatar,
-          streakDays: 14,
-          totalArticlesRead: 142,
-          totalBookmarks: 18,
+          streakDays: 1,
+          totalArticlesRead: 0,
+          totalBookmarks: 0,
         ));
+
+  void setUserProfile({
+    required String id,
+    required String name,
+    required String email,
+    required String avatarUrl,
+  }) {
+    state = state.copyWith(
+      id: id,
+      name: name,
+      email: email,
+      avatarUrl: avatarUrl.isNotEmpty ? avatarUrl : AppConstants.defaultUserAvatar,
+    );
+  }
 
   void updateName(String newName) {
     state = state.copyWith(name: newName);
@@ -24,5 +39,26 @@ class ProfileNotifier extends StateNotifier<UserProfile> {
 }
 
 final profileProvider = StateNotifierProvider<ProfileNotifier, UserProfile>((ref) {
-  return ProfileNotifier();
+  final notifier = ProfileNotifier();
+  ref.listen<AuthState>(authProvider, (previous, next) {
+    final firebaseUser = next.firebaseUser;
+    final backendProfile = next.userProfile;
+
+    if (firebaseUser != null) {
+      notifier.setUserProfile(
+        id: firebaseUser.uid,
+        name: firebaseUser.displayName ?? (firebaseUser.email?.split('@')[0] ?? 'News Reader'),
+        email: firebaseUser.email ?? 'user@newsx.ai',
+        avatarUrl: firebaseUser.photoURL ?? AppConstants.defaultUserAvatar,
+      );
+    } else if (backendProfile != null) {
+      notifier.setUserProfile(
+        id: (backendProfile['id'] ?? backendProfile['firebase_uid'] ?? 'usr_guest').toString(),
+        name: (backendProfile['name'] ?? 'News Reader').toString(),
+        email: (backendProfile['email'] ?? 'reader@newsx.ai').toString(),
+        avatarUrl: (backendProfile['photo'] ?? AppConstants.defaultUserAvatar).toString(),
+      );
+    }
+  });
+  return notifier;
 });

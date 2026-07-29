@@ -2,31 +2,29 @@ const ApiResponse = require('../utils/response');
 const { generateToken, generateRefreshToken } = require('../utils/jwt');
 const UserRepository = require('../repositories/userRepository');
 const { verifyFirebaseToken } = require('../config/firebase');
+const logger = require('../utils/logger');
 
 class AuthController {
   static async register(req, res, next) {
     try {
       const { firebaseToken, name, email, photo } = req.body;
-      let firebaseUser = { uid: `user_${Date.now()}`, name: name || 'Reader', email: email || 'user@newsx.ai', picture: photo };
+      const firebaseUser = await verifyFirebaseToken(firebaseToken);
 
-      if (firebaseToken) {
-        try {
-          const verified = await verifyFirebaseToken(firebaseToken);
-          if (verified) firebaseUser = verified;
-        } catch (e) {
-          // If token verification fails, use body payloads for development fallback
-        }
-      }
+      const realName = name || firebaseUser.name || (email ? email.split('@')[0] : 'Reader');
+      const realEmail = email || firebaseUser.email;
+      const realPhoto = photo || firebaseUser.picture || '';
+
+      logger.info(`🔐 Processing Firebase Registration for UID: ${firebaseUser.uid} (${realEmail})`);
 
       const user = await UserRepository.upsertUser({
         firebaseUid: firebaseUser.uid,
-        name: name || firebaseUser.name || 'Reader',
-        email: email || firebaseUser.email || 'reader@newsx.ai',
-        photo: photo || firebaseUser.picture || '',
+        name: realName,
+        email: realEmail,
+        photo: realPhoto,
       });
 
-      const token = generateToken({ id: user ? user.id : 1, firebase_uid: firebaseUser.uid, role: user ? user.role : 'user' });
-      const refreshToken = generateRefreshToken({ id: user ? user.id : 1 });
+      const token = generateToken({ id: user.id, firebase_uid: user.firebase_uid, role: user.role });
+      const refreshToken = generateRefreshToken({ id: user.id });
 
       return ApiResponse.success(res, 'User registered successfully', {
         user,
@@ -41,26 +39,23 @@ class AuthController {
   static async login(req, res, next) {
     try {
       const { firebaseToken, name, email, photo } = req.body;
-      let firebaseUser = { uid: `user_${Date.now()}`, name: name || 'NewsX User', email: email || 'user@newsx.ai', picture: photo };
+      const firebaseUser = await verifyFirebaseToken(firebaseToken);
 
-      if (firebaseToken) {
-        try {
-          const verified = await verifyFirebaseToken(firebaseToken);
-          if (verified) firebaseUser = verified;
-        } catch (e) {
-          // Fallback if verification error
-        }
-      }
+      const realName = name || firebaseUser.name || (email ? email.split('@')[0] : 'Reader');
+      const realEmail = email || firebaseUser.email;
+      const realPhoto = photo || firebaseUser.picture || '';
+
+      logger.info(`🔐 Processing Firebase Login for UID: ${firebaseUser.uid} (${realEmail})`);
 
       const user = await UserRepository.upsertUser({
         firebaseUid: firebaseUser.uid,
-        name: name || firebaseUser.name || 'NewsX User',
-        email: email || firebaseUser.email || 'user@newsx.ai',
-        photo: photo || firebaseUser.picture || '',
+        name: realName,
+        email: realEmail,
+        photo: realPhoto,
       });
 
-      const token = generateToken({ id: user ? user.id : 1, firebase_uid: firebaseUser.uid, role: user ? user.role : 'user' });
-      const refreshToken = generateRefreshToken({ id: user ? user.id : 1 });
+      const token = generateToken({ id: user.id, firebase_uid: user.firebase_uid, role: user.role });
+      const refreshToken = generateRefreshToken({ id: user.id });
 
       return ApiResponse.success(res, 'Login successful', {
         user,

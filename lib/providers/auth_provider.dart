@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -41,7 +42,7 @@ class AuthState {
 
 class AuthNotifier extends StateNotifier<AuthState> {
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
-  final GoogleSignIn _googleSignIn = GoogleSignIn();
+  final GoogleSignIn _googleSignIn = GoogleSignIn(scopes: ['email', 'profile']);
   final Dio _dio = Dio(BaseOptions(
     baseUrl: AppConstants.apiBaseUrl,
     connectTimeout: const Duration(seconds: 8),
@@ -54,6 +55,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
   void _listenToAuthState() {
     _firebaseAuth.authStateChanges().listen((User? user) async {
+      debugPrint('🔥 Firebase authStateChanges triggered. User: ${user?.email} (UID: ${user?.uid})');
       if (user != null) {
         final idToken = await user.getIdToken();
         await _syncUserWithBackend(idToken, user.displayName, user.email, user.photoURL);
@@ -81,34 +83,42 @@ class AuthNotifier extends StateNotifier<AuthState> {
   Future<bool> signInWithGoogle() async {
     state = state.copyWith(isLoading: true, error: null);
     try {
+      debugPrint('🔵 Step 1: Triggering Google Account Picker...');
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
       if (googleUser == null) {
+        debugPrint('🟡 Google Sign-In cancelled by user.');
         state = state.copyWith(isLoading: false);
         return false;
       }
 
+      debugPrint('🔵 Step 2: Google user selected: ${googleUser.email}');
       final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+      debugPrint('🔵 Step 3: Google Auth tokens received. AccessToken present: ${googleAuth.accessToken != null}, IDToken present: ${googleAuth.idToken != null}');
+
       final AuthCredential credential = GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
       );
 
+      debugPrint('🔵 Step 4: Signing in to Firebase Authentication with Credential...');
       final UserCredential userCredential = await _firebaseAuth.signInWithCredential(credential);
-      final idToken = await userCredential.user?.getIdToken();
+      final User? firebaseUser = userCredential.user;
 
-      await _syncUserWithBackend(idToken, googleUser.displayName, googleUser.email, googleUrlToHighRes(googleUser.photoUrl));
+      if (firebaseUser == null) {
+        throw Exception('Firebase authentication returned a null user.');
+      }
+
+      debugPrint('🟢 Step 5: Firebase Authentication Successful! UID: ${firebaseUser.uid}, Email: ${firebaseUser.email}');
+      final idToken = await firebaseUser.getIdToken();
+
+      await _syncUserWithBackend(idToken, firebaseUser.displayName ?? googleUser.displayName, firebaseUser.email ?? googleUser.email, firebaseUser.photoURL ?? googleUser.photoUrl);
+      state = state.copyWith(firebaseUser: firebaseUser, isLoading: false);
       return true;
-    } catch (e) {
-      final mockToken = 'mock_google_id_token_${DateTime.now().millisecondsSinceEpoch}';
-      await _syncUserWithBackend(mockToken, 'Google Reader', 'google.user@newsx.ai', null);
-      state = state.copyWith(isLoading: false);
-      return true;
+    } catch (e, stack) {
+      debugPrint('🔴 ERROR in signInWithGoogle: $e\n$stack');
+      state = state.copyWith(isLoading: false, error: e.toString());
+      return false;
     }
-  }
-
-  static String? googleUrlToHighRes(String? url) {
-    if (url == null) return null;
-    return url.replaceAll('s96-c', 's400-c');
   }
 
   Future<bool> registerWithEmail(String email, String password, String name) async {
@@ -123,12 +133,12 @@ class AuthNotifier extends StateNotifier<AuthState> {
       final idToken = await userCredential.user?.getIdToken();
 
       await _syncUserWithBackend(idToken, name, email, null);
+      state = state.copyWith(firebaseUser: userCredential.user, isLoading: false);
       return true;
     } catch (e) {
-      final mockToken = 'mock_email_id_token_${DateTime.now().millisecondsSinceEpoch}';
-      await _syncUserWithBackend(mockToken, name, email, null);
-      state = state.copyWith(isLoading: false);
-      return true;
+      debugPrint('🔴 Email Registration Error: $e');
+      state = state.copyWith(isLoading: false, error: e.toString());
+      return false;
     }
   }
 
@@ -142,28 +152,31 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
       final idToken = await userCredential.user?.getIdToken();
       await _syncUserWithBackend(idToken, userCredential.user?.displayName, email, null);
+      state = state.copyWith(firebaseUser: userCredential.user, isLoading: false);
       return true;
     } catch (e) {
-      final mockToken = 'mock_email_id_token_${DateTime.now().millisecondsSinceEpoch}';
-      await _syncUserWithBackend(mockToken, 'Verified Reader', email, null);
-      state = state.copyWith(isLoading: false);
-      return true;
+      debugPrint('🔴 Email Login Error: $e');
+      state = state.copyWith(isLoading: false, error: e.toString());
+      return false;
     }
   }
 
   Future<void> sendPasswordResetEmail(String email) async {
     try {
       await _firebaseAuth.sendPasswordResetEmail(email: email);
-    } catch (_) {}
+    } catch (e) {
+      debugPrint('🔴 Password Reset Error: $e');
+    }
   }
 
   Future<void> _syncUserWithBackend(String? firebaseToken, String? name, String? email, String? photo) async {
     try {
+      debugPrint('🔵 Syncing authenticated user ($email) with backend POST /api/v1/auth/login...');
       final response = await _dio.post('/auth/login', data: {
-        'firebaseToken': firebaseToken ?? 'guest_token',
-        'name': name ?? 'NewsX Reader',
-        'email': email ?? 'reader@newsx.ai',
-        'photo': photo ?? '',
+        'firebaseToken': firebaseToken,
+        'name': name,
+        'email': email,
+        'photo': photo,
       });
 
       if (response.statusCode == 200 && response.data != null) {
@@ -171,6 +184,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
         final jwt = data['token'] as String?;
         final profile = data['user'] as Map<String, dynamic>?;
 
+        debugPrint('🟢 Backend User Sync Succeeded! Received JWT token & User Profile: $profile');
         if (jwt != null) {
           final prefs = await SharedPreferences.getInstance();
           await prefs.setString('newsx_backend_jwt', jwt);
@@ -178,7 +192,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
         }
       }
     } catch (e) {
-      state = state.copyWith(isLoading: false);
+      debugPrint('⚠️ Backend sync warning: $e');
     }
   }
 

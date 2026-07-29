@@ -35,11 +35,28 @@ app.use((req, res) => {
 // Global Error Interceptor
 app.use(errorHandler);
 
-// Start HTTP Server
-const server = app.listen(env.port, () => {
-  logger.info(`🚀 NewsX Backend Server Running on Port ${env.port} [${env.nodeEnv}]`);
-  logger.info(`Base API URL: http://localhost:${env.port}${env.apiPrefix}`);
-});
+// Port Fallback Listener Strategy
+const startServer = (targetPort) => {
+  const server = app.listen(targetPort, () => {
+    logger.info(`🚀 NewsX Backend Server Running on Port ${targetPort} [${env.nodeEnv}]`);
+    logger.info(`Base API URL: http://localhost:${targetPort}${env.apiPrefix}`);
+  });
 
-// Setup Graceful Shutdown for PM2 & Docker Signals
-setupGracefulShutdown(server);
+  server.on('error', (err) => {
+    if (err.code === 'EADDRINUSE') {
+      logger.warn(`⚠️ Port ${targetPort} is occupied by another process (e.g., macOS ControlCenter/AirPlay). Trying Port ${targetPort + 1}...`);
+      startServer(targetPort + 1);
+    } else {
+      logger.error('❌ Server failed to start:', err);
+      process.exit(1);
+    }
+  });
+
+  setupGracefulShutdown(server);
+  return server;
+};
+
+const initialPort = env.port || 5000;
+startServer(initialPort);
+
+module.exports = app;

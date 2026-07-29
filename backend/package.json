@@ -6,6 +6,7 @@
   "scripts": {
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
+    "build": "echo 'No build step required for Express backend'",
     "seed": "node src/database/seeders/seed.js",
     "cron": "node src/cron/newsCron.js",
     "migrate:phase3": "node src/database/migrations/migratePhase3.js"

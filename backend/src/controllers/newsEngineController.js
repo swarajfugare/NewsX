@@ -3,54 +3,79 @@ const { query } = require('../config/database');
 
 const fallbackArticles = [
   {
-    id: 'news-101',
-    title: 'Google DeepMind Unveils Next-Gen Multimodal AI Architectures',
-    summary: 'DeepMind announces breakthrough spatial reasoning and real-time vision capabilities powered by advanced Gemini 2.0 neural networks.',
-    summary_mr: 'ग्लोबल एआय क्रांती: दीपमाइंडने पुढच्या पिढीतील एआय तंत्रज्ञान जाहीर केले.',
-    summary_hi: 'गूगल दीपमाइंड ने अगली पीढ़ी के आर्टिफ़िशियल इंटेलिजेंस का अनावरण किया।',
-    imageUrl: 'https://images.unsplash.com/photo-1677442136019-21780efad99a?q=80&w=1000&auto=format&fit=crop',
-    image_url: 'https://images.unsplash.com/photo-1677442136019-21780efad99a?q=80&w=1000&auto=format&fit=crop',
-    category: 'AI',
-    author: 'TechCrunch',
-    source_name: 'TechCrunch',
+    id: 'news-ind-201',
+    title: 'India Unveils Massive Semiconductor Manufacturing Complex in Gujarat',
+    summary: 'India inaugurates a multi-billion dollar semiconductor fabrication facility in Dholera, boosting domestic chip production, technological sovereignty, and advanced electronics manufacturing across the nation.',
+    summary_mr: 'भारताने गुजरातमधील धोलेशिथे बहु-अब्ज डॉलरच्या सेमीकंडक्टर फॅब्रिकेशन प्रकल्पाचे उद्घाटन केले.',
+    summary_hi: 'भारत ने गुजरात के धोलेरा में मल्टी-बिलियन डॉलर सेमीकंडक्टर फैब्रिकेशन सुविधा का उद्घाटन किया।',
+    imageUrl: 'https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=1000&auto=format&fit=crop',
+    image_url: 'https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=1000&auto=format&fit=crop',
+    category: 'Technology',
+    author: 'Times of India',
+    source_name: 'Times of India',
     publishedAt: new Date().toISOString(),
     published_at: new Date().toISOString(),
     readTime: '2 min read',
     language: 'English',
-    likes: 342,
-    shares: 89,
-    commentsCount: 24,
-    sourceUrl: 'https://techcrunch.com',
-    why_it_matters: 'Sets new benchmarks for agentic AI automation.',
-    sentiment: 'Positive',
-    importance_score: 9,
-    tags: ['AI', 'Tech', 'NewsX'],
-    keywords: ['AI', 'DeepMind']
-  },
-  {
-    id: 'news-102',
-    title: 'India Wins T20 World Cup Final in Thrilling Last-Over Finish',
-    summary: 'India secures spectacular T20 World Cup trophy victory with extraordinary death-overs bowling performance.',
-    summary_mr: 'भारतीय संघाने विश्वचषक विजेतेपदावर नाव कोरले.',
-    summary_hi: 'भारत ने रोमांचक फाइनल मुकाबले में विश्व कप का खिताब जीता।',
-    imageUrl: 'https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?q=80&w=1000&auto=format&fit=crop',
-    image_url: 'https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?q=80&w=1000&auto=format&fit=crop',
-    category: 'Cricket',
-    author: 'ESPN Cricinfo',
-    source_name: 'ESPN Cricinfo',
-    publishedAt: new Date(Date.now() - 3600000).toISOString(),
-    published_at: new Date(Date.now() - 3600000).toISOString(),
-    readTime: '3 min read',
-    language: 'English',
-    likes: 1250,
-    shares: 412,
-    commentsCount: 156,
-    sourceUrl: 'https://www.espncricinfo.com',
-    why_it_matters: 'Historic sports victory celebration across the nation.',
+    likes: 542,
+    shares: 189,
+    commentsCount: 42,
+    sourceUrl: 'https://timesofindia.indiatimes.com',
+    why_it_matters: 'Boosts India self-reliance in global semiconductor supply chain.',
     sentiment: 'Positive',
     importance_score: 10,
-    tags: ['Cricket', 'WorldCup', 'India'],
-    keywords: ['Cricket', 'India']
+    tags: ['India', 'Tech', 'Semiconductors'],
+    keywords: ['India', 'Semiconductor', 'Gujarat']
+  },
+  {
+    id: 'news-ind-202',
+    title: 'ISRO Announces Launch Date for Gaganyaan Manned Spaceflight Mission',
+    summary: 'The Indian Space Research Organisation confirms final preparations for the historic Gaganyaan crewed space mission, taking astronaut crew into low Earth orbit aboard native launch vehicle LVM3.',
+    summary_mr: 'इस्रोने गगनयान मानवी अंतराळ मोहिमेच्या प्रक्षेपणाची अंतिम तारीख जाहीर केली.',
+    summary_hi: 'इसरो ने ऐतिहासिक गगनयान मानवयुक्त अंतरिक्ष मिशन के लिए अंतिम तारीख की पुष्टि की।',
+    imageUrl: 'https://images.unsplash.com/photo-1517976487492-5750f3195933?q=80&w=1000&auto=format&fit=crop',
+    image_url: 'https://images.unsplash.com/photo-1517976487492-5750f3195933?q=80&w=1000&auto=format&fit=crop',
+    category: 'Science',
+    author: 'NDTV News',
+    source_name: 'NDTV News',
+    publishedAt: new Date(Date.now() - 1800000).toISOString(),
+    published_at: new Date(Date.now() - 1800000).toISOString(),
+    readTime: '2 min read',
+    language: 'English',
+    likes: 890,
+    shares: 310,
+    commentsCount: 88,
+    sourceUrl: 'https://www.ndtv.com',
+    why_it_matters: 'Historic milestone for Indian space exploration and manned missions.',
+    sentiment: 'Positive',
+    importance_score: 10,
+    tags: ['ISRO', 'Space', 'Gaganyaan'],
+    keywords: ['ISRO', 'Gaganyaan', 'India']
+  },
+  {
+    id: 'news-ind-203',
+    title: 'Reserve Bank of India Keeps Repo Rate Steady Amid Economic Growth',
+    summary: 'RBI Governor announces monetary policy decision keeping interest rates unchanged, highlighting resilient GDP growth forecasts, controlled inflation targets, and stable banking system liquidity across India.',
+    summary_mr: 'रिझर्व्ह बँकेने आर्थिक वाढीला गती देण्यासाठी रेपो दर स्थिर ठेवण्याचा निर्णय घेतला.',
+    summary_hi: 'भारतीय रिजर्व बैंक ने मजबूत आर्थिक वृद्धि के बीच मुख्य ब्याज दर को स्थिर रखा।',
+    imageUrl: 'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?q=80&w=1000&auto=format&fit=crop',
+    image_url: 'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?q=80&w=1000&auto=format&fit=crop',
+    category: 'Business',
+    author: 'Indian Express',
+    source_name: 'Indian Express',
+    publishedAt: new Date(Date.now() - 3600000).toISOString(),
+    published_at: new Date(Date.now() - 3600000).toISOString(),
+    readTime: '2 min read',
+    language: 'English',
+    likes: 412,
+    shares: 98,
+    commentsCount: 19,
+    sourceUrl: 'https://indianexpress.com',
+    why_it_matters: 'Influences home loans, inflation, and investment sentiment.',
+    sentiment: 'Neutral',
+    importance_score: 8,
+    tags: ['RBI', 'Economy', 'India'],
+    keywords: ['RBI', 'Economy', 'RepoRate']
   }
 ];
 
@@ -59,10 +84,20 @@ class NewsEngineController {
     try {
       const limit = parseInt(req.query.limit) || 40;
       const offset = parseInt(req.query.offset) || 0;
-      const articles = await query(
-        `SELECT * FROM news_articles WHERE status = 'processed' ORDER BY published_at DESC LIMIT ? OFFSET ?`,
-        [limit, offset]
-      );
+      const language = req.query.language || 'English';
+
+      let sql = `SELECT * FROM news_articles WHERE status = 'processed'`;
+      const params = [];
+
+      if (language && language !== 'All') {
+        sql += ` AND (LOWER(language) = LOWER(?) OR language IS NULL)`;
+        params.push(language);
+      }
+
+      sql += ` ORDER BY published_at DESC LIMIT ? OFFSET ?`;
+      params.push(limit, offset);
+
+      const articles = await query(sql, params);
       if (articles && articles.length > 0) {
         return ApiResponse.success(res, 'Latest news retrieved', articles);
       }

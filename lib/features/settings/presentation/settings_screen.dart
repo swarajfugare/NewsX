@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/theme/theme_provider.dart';
+import '../../../providers/personalised_feed_provider.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
@@ -14,10 +16,42 @@ class SettingsScreen extends ConsumerStatefulWidget {
 class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   bool _breakingNewsNotifications = true;
   bool _dailyDigestNotifications = false;
-  String _selectedLanguage = 'English (US)';
+  String _selectedLanguage = 'English';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadLanguagePreference();
+  }
+
+  Future<void> _loadLanguagePreference() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _selectedLanguage = prefs.getString('newsx_preferred_language') ?? 'English';
+    });
+  }
+
+  Future<void> _saveLanguagePreference(String lang) async {
+    setState(() => _selectedLanguage = lang);
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('newsx_preferred_language', lang);
+    ref.read(personalisedFeedProvider.notifier).loadFeed();
+  }
 
   void _showLanguageDialog() {
-    final languages = ['English (US)', 'English (UK)', 'Hindi (हिंदी)', 'Spanish (Español)'];
+    final languages = [
+      'English',
+      'Hindi (हिंदी)',
+      'Marathi (मराठी)',
+      'Tamil (தமிழ்)',
+      'Telugu (తెలుగు)',
+      'Gujarati (ગુજરાતી)',
+      'Bengali (বাংলা)',
+      'Kannada (ಕನ್ನಡ)',
+      'Malayalam (मलयज)',
+      'Punjabi (ਪੰਜਾਬੀ)'
+    ];
+
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
@@ -35,15 +69,21 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 16),
-              ...languages.map(
-                (lang) => ListTile(
-                  title: Text(lang),
-                  trailing: _selectedLanguage == lang
-                      ? const Icon(Icons.check_circle_rounded, color: AppColors.primary)
-                      : null,
-                  onTap: () {
-                    setState(() => _selectedLanguage = lang);
-                    Navigator.pop(context);
+              Expanded(
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: languages.length,
+                  itemBuilder: (context, index) {
+                    final lang = languages[index];
+                    final isSelected = _selectedLanguage == lang || _selectedLanguage == lang.split(' ')[0];
+                    return ListTile(
+                      title: Text(lang),
+                      trailing: isSelected ? const Icon(Icons.check_circle_rounded, color: AppColors.primary) : null,
+                      onTap: () {
+                        _saveLanguagePreference(lang.split(' ')[0]);
+                        Navigator.pop(context);
+                      },
+                    );
                   },
                 ),
               ),
@@ -85,7 +125,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         padding: const EdgeInsets.all(16),
         children: [
           // Appearance Header
-          _SettingsSectionHeader(title: 'APPEARANCE'),
+          const _SettingsSectionHeader(title: 'APPEARANCE'),
           ListTile(
             leading: const Icon(Icons.palette_outlined),
             title: const Text('App Theme'),
@@ -110,11 +150,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ),
           const Divider(),
           // Notifications Section
-          _SettingsSectionHeader(title: 'NOTIFICATIONS'),
+          const _SettingsSectionHeader(title: 'NOTIFICATIONS'),
           SwitchListTile(
             secondary: const Icon(Icons.bolt_outlined),
             title: const Text('Breaking News Alerts'),
-            subtitle: const Text('Receive instant notifications for major global news events'),
+            subtitle: const Text('Receive instant notifications for major Indian & national news events'),
             value: _breakingNewsNotifications,
             onChanged: (val) => setState(() => _breakingNewsNotifications = val),
           ),
@@ -127,7 +167,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ),
           const Divider(),
           // Content & Preferences
-          _SettingsSectionHeader(title: 'PREFERENCES'),
+          const _SettingsSectionHeader(title: 'PREFERENCES'),
           ListTile(
             leading: const Icon(Icons.language_outlined),
             title: const Text('News Language'),
@@ -137,14 +177,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ),
           const Divider(),
           // About & Legal
-          _SettingsSectionHeader(title: 'ABOUT & LEGAL'),
+          const _SettingsSectionHeader(title: 'ABOUT & LEGAL'),
           ListTile(
             leading: const Icon(Icons.info_outline_rounded),
             title: const Text('About ${AppConstants.appName}'),
             subtitle: const Text('${AppConstants.appName} - ${AppConstants.appTagline}'),
             onTap: () => _showInfoModal(
               'About ${AppConstants.appName}',
-              '${AppConstants.appName} is a modern AI-powered news application designed for rapid, objective news consumption inspired by Reels and Inshorts.',
+              '${AppConstants.appName} is an AI-powered smart news application providing 25-word briefings, native sharing, and full publisher reading experience.',
             ),
           ),
           ListTile(
@@ -152,7 +192,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             title: const Text('Privacy Policy'),
             onTap: () => _showInfoModal(
               'Privacy Policy',
-              'Phase 1 UI Notice: Your privacy is respected. No data is sent or collected during Phase 1 local UI state operations.',
+              'NewsX values user privacy. Personal account preferences and authentication tokens are stored securely.',
             ),
           ),
           ListTile(
@@ -160,7 +200,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             title: const Text('Terms of Service'),
             onTap: () => _showInfoModal(
               'Terms of Service',
-              'Standard terms apply for using ${AppConstants.appName} services and content consumption.',
+              'Standard terms apply for using ${AppConstants.appName} services and news aggregation feeds.',
             ),
           ),
           const SizedBox(height: 32),

@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../core/constants/app_colors.dart';
-import '../../../core/constants/app_constants.dart';
 import '../../../core/router/route_names.dart';
 import '../../../core/widgets/category_chip.dart';
 import '../../../core/widgets/loading_skeleton.dart';
@@ -35,67 +36,22 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     }
   }
 
-  void _shareArticle(String title) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Sharing: "$title"'),
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        duration: const Duration(seconds: 2),
-      ),
-    );
+  Future<void> _shareArticle(NewsArticle article) async {
+    final text = '${article.title}\n\n${article.summary}\n\nRead more at ${article.author}: ${article.sourceUrl}';
+    await Share.share(text, subject: article.title);
   }
 
-  void _openArticleDetail(NewsArticle article) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) {
-        return Container(
-          height: MediaQuery.of(context).size.height * 0.85,
-          decoration: BoxDecoration(
-            color: Theme.of(context).scaffoldBackgroundColor,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-          ),
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: Colors.grey.withValues(alpha: 0.4),
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              Text(
-                article.title,
-                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Source: ${article.author} • ${article.category}',
-                style: const TextStyle(fontSize: 12, color: Colors.grey),
-              ),
-              const SizedBox(height: 16),
-              Expanded(
-                child: SingleChildScrollView(
-                  child: Text(
-                    '${article.summary}\n\nFull AI news report ingestion completed for ${AppConstants.appName}. Complete article details are synchronized directly from RSS feeds.',
-                    style: const TextStyle(fontSize: 15, height: 1.6),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
+  Future<void> _openOriginalPublisher(NewsArticle article) async {
+    final uri = Uri.parse(article.sourceUrl.isNotEmpty ? article.sourceUrl : 'https://news.google.com');
+    try {
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+      } else {
+        await launchUrl(uri, mode: LaunchMode.inAppBrowserView);
+      }
+    } catch (e) {
+      debugPrint('Error launching publisher URL: $e');
+    }
   }
 
   @override
@@ -167,8 +123,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             ),
                           );
                         },
-                        onShareTap: () => _shareArticle(article.title),
-                        onTap: () => _openArticleDetail(article),
+                        onShareTap: () => _shareArticle(article),
+                        onTap: () => _openOriginalPublisher(article),
                       );
                     },
                   ),

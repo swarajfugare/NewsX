@@ -15,6 +15,10 @@ dependencies:
   firebase_auth: ^5.1.0
   google_sign_in: ^6.2.1
 
+  # Native Sharing & Web Browser Launcher
+  share_plus: ^9.0.0
+  url_launcher: ^6.3.0
+
   # State Management
   flutter_riverpod: ^2.5.1
   

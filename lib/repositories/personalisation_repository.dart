@@ -1,3 +1,4 @@
+import 'package:shared_preferences/shared_preferences.dart';
 import '../core/network/api_client.dart';
 import '../core/storage/local_cache_service.dart';
 import '../models/news_article.dart';
@@ -5,11 +6,14 @@ import '../models/news_article.dart';
 class PersonalisationRepository {
   final ApiClient _apiClient = ApiClient();
 
-  Future<List<NewsArticle>> fetchPersonalisedFeed({int limit = 40, int offset = 0}) async {
+  Future<List<NewsArticle>> fetchPersonalisedFeed({int limit = 40, int offset = 0, String? language}) async {
     try {
+      final prefs = await SharedPreferences.getInstance();
+      final lang = language ?? prefs.getString('newsx_preferred_language') ?? 'English';
+
       final response = await _apiClient.get(
         '/news/personalised',
-        queryParameters: {'limit': limit, 'offset': offset},
+        queryParameters: {'limit': limit, 'offset': offset, 'language': lang},
       );
       if (response.data['success'] == true) {
         final List list = response.data['data'];
@@ -20,7 +24,6 @@ class PersonalisationRepository {
         return articles;
       }
     } catch (_) {
-      // Offline Reading Fallback
       if (offset == 0) {
         return LocalCacheService.getCachedArticles();
       }
@@ -47,7 +50,7 @@ class PersonalisationRepository {
         return list.map((e) => e.toString()).toList();
       }
     } catch (_) {}
-    return ['OpenAI GPT-5', 'Cricket World Cup', 'NVIDIA Stock', 'Quantum Computing'];
+    return ['Cricket World Cup', 'Indian Economy', 'AI Revolution', 'Technology', 'ISRO Space Mission'];
   }
 
   Future<void> trackReadingDuration(String newsId, int durationSeconds) async {

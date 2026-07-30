@@ -112,7 +112,7 @@ class NewsArticle {
       commentsCount: json['commentsCount'] as int? ?? json['comments_count'] as int? ?? 0,
       isLiked: json['isLiked'] as bool? ?? false,
       isBookmarked: json['isBookmarked'] as bool? ?? false,
-      sourceUrl: json['sourceUrl'] as String? ?? json['canonical_url'] as String? ?? 'https://news.google.com',
+      sourceUrl: json['sourceUrl'] as String? ?? json['source_url'] as String? ?? json['canonical_url'] as String? ?? 'https://news.google.com',
       whyItMatters: json['whyItMatters'] as String? ?? json['why_it_matters'] as String? ?? 'Key impact insight.',
       sentiment: json['sentiment'] as String? ?? 'Neutral',
       importanceScore: json['importanceScore'] as int? ?? json['importance_score'] as int? ?? 8,

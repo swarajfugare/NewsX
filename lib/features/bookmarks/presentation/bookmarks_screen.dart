@@ -7,6 +7,7 @@ import '../../../core/utils/date_formatter.dart';
 import '../../../core/widgets/custom_cached_image.dart';
 import '../../../core/widgets/empty_state_widget.dart';
 import '../../../models/news_article.dart';
+import '../../../providers/auth_provider.dart';
 import '../../../providers/bookmarks_provider.dart';
 import '../../../providers/news_provider.dart';
 
@@ -15,8 +16,22 @@ class BookmarksScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final authState = ref.watch(authProvider);
     final bookmarkedIds = ref.watch(bookmarksProvider);
     final allArticles = ref.watch(rawNewsArticlesProvider);
+
+    if (authState.isGuest) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('Saved Bookmarks')),
+        body: EmptyStateWidget(
+          icon: Icons.lock_outline_rounded,
+          title: 'Guest Session Active',
+          message: 'Guest users cannot save bookmarks. Please sign in with Google or Email to save articles.',
+          actionLabel: 'Sign In / Register',
+          onAction: () => context.go(RouteNames.welcome),
+        ),
+      );
+    }
 
     final savedArticles =
         allArticles.where((a) => bookmarkedIds.contains(a.id)).toList();

@@ -1,27 +1,48 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/router/route_names.dart';
+import '../../../providers/auth_provider.dart';
 
-class SplashScreen extends StatefulWidget {
+class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
 
   @override
-  State<SplashScreen> createState() => _SplashScreenState();
+  ConsumerState<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> {
+class _SplashScreenState extends ConsumerState<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    Timer(AppConstants.splashDelay, () {
-      if (mounted) {
-        context.go(RouteNames.onboarding);
-      }
-    });
+    _handleAutoLaunch();
+  }
+
+  Future<void> _handleAutoLaunch() async {
+    await Future.delayed(AppConstants.splashDelay);
+    if (!mounted) return;
+
+    final authState = ref.read(authProvider);
+
+    if (authState.isAuthenticated || authState.isGuest) {
+      debugPrint('🟢 Auto-restoring session (${authState.status.name}). Launching Home direct...');
+      context.go(RouteNames.home);
+      return;
+    }
+
+    final prefs = await SharedPreferences.getInstance();
+    final hasCompletedOnboarding = prefs.getBool('newsx_onboarding_completed') ?? false;
+
+    if (hasCompletedOnboarding) {
+      context.go(RouteNames.welcome);
+    } else {
+      context.go(RouteNames.onboarding);
+    }
   }
 
   @override

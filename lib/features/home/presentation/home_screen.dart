@@ -2,15 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/constants/app_constants.dart';
 import '../../../core/router/route_names.dart';
 import '../../../core/widgets/category_chip.dart';
 import '../../../core/widgets/loading_skeleton.dart';
 import '../../../models/news_article.dart';
+import '../../../providers/auth_provider.dart';
 import '../../../providers/bookmarks_provider.dart';
 import '../../../providers/news_provider.dart';
 import '../../../providers/personalised_feed_provider.dart';
-import 'widgets/breaking_news_ticker.dart';
-import 'widgets/hero_featured_carousel.dart';
 import 'widgets/news_article_card.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
@@ -21,23 +21,16 @@ class HomeScreen extends ConsumerStatefulWidget {
 }
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
-  final ScrollController _scrollController = ScrollController();
-
-  @override
-  void initState() {
-    super.initState();
-    _scrollController.addListener(_onScroll);
-  }
+  final PageController _pageController = PageController();
 
   @override
   void dispose() {
-    _scrollController.removeListener(_onScroll);
-    _scrollController.dispose();
+    _pageController.dispose();
     super.dispose();
   }
 
-  void _onScroll() {
-    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 400) {
+  void _onPageChanged(int index, int totalArticles) {
+    if (index >= totalArticles - 3) {
       ref.read(personalisedFeedProvider.notifier).prefetchNextPage();
     }
   }
@@ -54,11 +47,54 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   void _openArticleDetail(NewsArticle article) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Opening: ${article.title}'),
-        duration: const Duration(milliseconds: 1000),
-      ),
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return Container(
+          height: MediaQuery.of(context).size.height * 0.85,
+          decoration: BoxDecoration(
+            color: Theme.of(context).scaffoldBackgroundColor,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+          ),
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Colors.grey.withValues(alpha: 0.4),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                article.title,
+                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Source: ${article.author} • ${article.category}',
+                style: const TextStyle(fontSize: 12, color: Colors.grey),
+              ),
+              const SizedBox(height: 16),
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Text(
+                    '${article.summary}\n\nFull AI news report ingestion completed for ${AppConstants.appName}. Complete article details are synchronized directly from RSS feeds.',
+                    style: const TextStyle(fontSize: 15, height: 1.6),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 
@@ -66,6 +102,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Widget build(BuildContext context) {
     final feedState = ref.watch(personalisedFeedProvider);
     final selectedCategory = ref.watch(selectedCategoryProvider);
+    final authState = ref.watch(authProvider);
 
     final categories = [
       'All',
@@ -83,183 +120,140 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     ];
 
     final articles = feedState.articles;
-    final featuredArticles = articles.take(3).toList();
-    final feedArticles = articles.skip(3).toList();
-    final breakingHeadline = articles.isNotEmpty ? articles.first.title : 'AI Engine Ingesting Latest Global News...';
 
     return Scaffold(
-      appBar: AppBar(
-        centerTitle: false,
-        elevation: 0,
-        title: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(6),
-              decoration: BoxDecoration(
-                gradient: AppColors.primaryGradient,
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: const Icon(Icons.flash_on_rounded, color: Colors.white, size: 20),
-            ),
-            const SizedBox(width: 10),
-            const Text(
-              'NewsX',
-              style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.w900,
-                letterSpacing: -0.5,
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.search_rounded),
-            onPressed: () => context.go(RouteNames.search),
-          ),
-          IconButton(
-            icon: const Icon(Icons.notifications_none_rounded),
-            onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('No new breaking news notifications.'),
-                  duration: Duration(seconds: 1),
-                ),
-              );
-            },
-          ),
-          const SizedBox(width: 8),
-        ],
-      ),
-      body: RefreshIndicator(
-        onRefresh: () async {
-          await ref.read(personalisedFeedProvider.notifier).loadFeed();
-        },
-        child: feedState.isLoading && articles.isEmpty
-            ? ListView.builder(
-                padding: const EdgeInsets.all(16),
-                itemCount: 4,
-                itemBuilder: (context, index) => const Padding(
-                  padding: EdgeInsets.only(bottom: 16),
-                  child: LoadingSkeleton(width: double.infinity, height: 260),
-                ),
-              )
-            : CustomScrollView(
-                controller: _scrollController,
-                physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
-                slivers: [
-                  // Breaking News Banner Ticker
-                  SliverToBoxAdapter(
-                    child: BreakingNewsTicker(
-                      text: breakingHeadline,
-                      onTap: () {
-                        if (articles.isNotEmpty) _openArticleDetail(articles.first);
-                      },
-                    ),
-                  ),
+      backgroundColor: Colors.black,
+      body: Stack(
+        children: [
+          // 1. Endless Vertical NewsPulse Swipe Player (PageView.builder)
+          feedState.isLoading && articles.isEmpty
+              ? const Center(
+                  child: LoadingSkeleton(width: double.infinity, height: double.infinity),
+                )
+              : RefreshIndicator(
+                  color: AppColors.primary,
+                  onRefresh: () async {
+                    await ref.read(personalisedFeedProvider.notifier).loadFeed();
+                  },
+                  child: PageView.builder(
+                    controller: _pageController,
+                    scrollDirection: Axis.vertical,
+                    itemCount: articles.length,
+                    onPageChanged: (index) => _onPageChanged(index, articles.length),
+                    itemBuilder: (context, index) {
+                      final article = articles[index];
+                      final isBookmarked = ref.read(bookmarksProvider.notifier).isBookmarked(article.id);
 
-                  // Hero Featured Story Carousel
-                  if (featuredArticles.isNotEmpty) ...[
-                    const SliverToBoxAdapter(
-                      child: Padding(
-                        padding: EdgeInsets.only(left: 16, top: 8, bottom: 8),
-                        child: Text(
-                          'Top Headlines',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ),
-                    SliverToBoxAdapter(
-                      child: HeroFeaturedCarousel(
-                        articles: featuredArticles,
-                        onArticleTap: _openArticleDetail,
-                      ),
-                    ),
-                  ],
-
-                  // Category Selector Sticky Bar
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      child: SizedBox(
-                        height: 38,
-                        child: ListView.builder(
-                          scrollDirection: Axis.horizontal,
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
-                          itemCount: categories.length,
-                          itemBuilder: (context, index) {
-                            final cat = categories[index];
-                            return CategoryChip(
-                              label: cat,
-                              isSelected: selectedCategory == cat,
-                              onTap: () {
-                                ref.read(selectedCategoryProvider.notifier).state = cat;
-                                ref.read(personalisedFeedProvider.notifier).loadFeed();
-                              },
+                      return NewsArticleCard(
+                        article: article,
+                        isBookmarked: isBookmarked,
+                        onBookmarkTap: () {
+                          if (authState.isGuest) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Guest users cannot save bookmarks. Please sign in.'),
+                                duration: Duration(seconds: 2),
+                              ),
                             );
-                          },
-                        ),
-                      ),
-                    ),
-                  ),
-
-                  // Section Title
-                  const SliverToBoxAdapter(
-                    child: Padding(
-                      padding: EdgeInsets.only(left: 16, bottom: 12),
-                      child: Text(
-                        'Latest News Feed',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
-
-                  // Main Scrollable News Article List Feed
-                  SliverPadding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    sliver: SliverList(
-                      delegate: SliverChildBuilderDelegate(
-                        (context, index) {
-                          if (index < feedArticles.length) {
-                            final article = feedArticles[index];
-                            final isBookmarked = ref.read(bookmarksProvider.notifier).isBookmarked(article.id);
-
-                            return NewsArticleCard(
-                              article: article,
-                              isBookmarked: isBookmarked,
-                              onBookmarkTap: () {
-                                ref.read(bookmarksProvider.notifier).toggleBookmark(article.id);
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(
-                                      isBookmarked ? 'Removed from Bookmarks' : 'Saved to Bookmarks',
-                                    ),
-                                    duration: const Duration(milliseconds: 1200),
-                                  ),
-                                );
-                              },
-                              onShareTap: () => _shareArticle(article.title),
-                              onTap: () => _openArticleDetail(article),
-                            );
+                            return;
                           }
-                          return const SizedBox.shrink();
+                          ref.read(bookmarksProvider.notifier).toggleBookmark(article.id);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                isBookmarked ? 'Removed from Bookmarks' : 'Saved to Bookmarks',
+                              ),
+                              duration: const Duration(milliseconds: 1200),
+                            ),
+                          );
                         },
-                        childCount: feedArticles.length,
-                      ),
-                    ),
+                        onShareTap: () => _shareArticle(article.title),
+                        onTap: () => _openArticleDetail(article),
+                      );
+                    },
                   ),
+                ),
 
-                  const SliverToBoxAdapter(
-                    child: SizedBox(height: 32),
+          // 2. Top Floating NewsPulse Header Overlay (Brand Title + Search + Category Selector)
+          SafeArea(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(6),
+                            decoration: BoxDecoration(
+                              gradient: AppColors.primaryGradient,
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: const Icon(Icons.bolt_rounded, color: Colors.white, size: 20),
+                          ),
+                          const SizedBox(width: 8),
+                          const Text(
+                            'NewsPulse',
+                            style: TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.w900,
+                              color: Colors.white,
+                              letterSpacing: -0.5,
+                            ),
+                          ),
+                        ],
+                      ),
+                      Row(
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.search_rounded, color: Colors.white),
+                            onPressed: () => context.go(RouteNames.search),
+                          ),
+                          if (authState.isGuest)
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: Colors.white24,
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: const Text(
+                                'GUEST',
+                                style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.white),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+
+                // Category Selector Chips Horizontal Bar
+                SizedBox(
+                  height: 36,
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    itemCount: categories.length,
+                    itemBuilder: (context, index) {
+                      final cat = categories[index];
+                      return CategoryChip(
+                        label: cat,
+                        isSelected: selectedCategory == cat,
+                        onTap: () {
+                          ref.read(selectedCategoryProvider.notifier).state = cat;
+                          ref.read(personalisedFeedProvider.notifier).loadFeed();
+                        },
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

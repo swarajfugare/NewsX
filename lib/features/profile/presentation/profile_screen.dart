@@ -52,9 +52,9 @@ class ProfileScreen extends ConsumerWidget {
     final recentArticles = ref.watch(rawNewsArticlesProvider).take(4).toList();
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    final displayName = authState.firebaseUser?.displayName ?? authState.userProfile?['name'] as String? ?? userProfile.name;
-    final displayEmail = authState.firebaseUser?.email ?? authState.userProfile?['email'] as String? ?? userProfile.email;
-    final displayPhoto = authState.firebaseUser?.photoURL ?? authState.userProfile?['photo'] as String? ?? userProfile.avatarUrl;
+    final displayName = authState.displayName;
+    final displayEmail = authState.displayEmail;
+    final displayPhoto = authState.displayPhoto;
 
     return Scaffold(
       appBar: AppBar(
@@ -77,20 +77,21 @@ class ProfileScreen extends ConsumerWidget {
                 children: [
                   CircleAvatar(
                     radius: 46,
-                    backgroundImage: NetworkImage(displayPhoto.isNotEmpty ? displayPhoto : userProfile.avatarUrl),
+                    backgroundImage: NetworkImage(displayPhoto),
                   ),
-                  Positioned(
-                    bottom: 0,
-                    right: 0,
-                    child: Container(
-                      padding: const EdgeInsets.all(4),
-                      decoration: const BoxDecoration(
-                        color: AppColors.primary,
-                        shape: BoxShape.circle,
+                  if (!authState.isGuest)
+                    Positioned(
+                      bottom: 0,
+                      right: 0,
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: const BoxDecoration(
+                          color: AppColors.primary,
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(Icons.edit, size: 14, color: Colors.white),
                       ),
-                      child: const Icon(Icons.edit, size: 14, color: Colors.white),
                     ),
-                  ),
                 ],
               ),
             ),
@@ -114,29 +115,34 @@ class ProfileScreen extends ConsumerWidget {
             const SizedBox(height: 16),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: CustomButton(
-                      label: 'Edit Profile',
-                      variant: CustomButtonVariant.outlined,
+              child: authState.isGuest
+                  ? CustomButton(
+                      label: 'Sign In / Register Account',
+                      variant: CustomButtonVariant.gradient,
                       height: 44,
-                      onPressed: () => _showEditProfileDialog(context, ref, displayName),
+                      onPressed: () => context.go(RouteNames.welcome),
+                    )
+                  : Row(
+                      children: [
+                        Expanded(
+                          child: CustomButton(
+                            label: 'Edit Profile',
+                            variant: CustomButtonVariant.outlined,
+                            height: 44,
+                            onPressed: () => _showEditProfileDialog(context, ref, displayName),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        IconButton(
+                          icon: const Icon(Icons.logout_rounded, color: AppColors.accentRose),
+                          tooltip: 'Logout',
+                          onPressed: () async {
+                            await ref.read(authProvider.notifier).logout();
+                            if (context.mounted) context.go(RouteNames.welcome);
+                          },
+                        ),
+                      ],
                     ),
-                  ),
-                  if (authState.isAuthenticated) ...[
-                    const SizedBox(width: 12),
-                    IconButton(
-                      icon: const Icon(Icons.logout_rounded, color: AppColors.accentRose),
-                      tooltip: 'Logout',
-                      onPressed: () async {
-                        await ref.read(authProvider.notifier).logout();
-                        if (context.mounted) context.go(RouteNames.welcome);
-                      },
-                    ),
-                  ],
-                ],
-              ),
             ),
             const SizedBox(height: 24),
             // Reading Stats Bar
@@ -156,7 +162,7 @@ class ProfileScreen extends ConsumerWidget {
                   children: [
                     _StatItem(
                       label: 'Streak',
-                      value: '🔥 ${userProfile.streakDays} Days',
+                      value: authState.isGuest ? '1 Day' : '🔥 ${userProfile.streakDays} Days',
                       accentColor: AppColors.accentAmber,
                     ),
                     Container(
@@ -176,7 +182,7 @@ class ProfileScreen extends ConsumerWidget {
                     ),
                     _StatItem(
                       label: 'Saved',
-                      value: '${bookmarks.length}',
+                      value: authState.isGuest ? '0' : '${bookmarks.length}',
                       accentColor: AppColors.accentEmerald,
                     ),
                   ],
@@ -186,35 +192,45 @@ class ProfileScreen extends ConsumerWidget {
             const SizedBox(height: 24),
             const SectionHeader(title: 'Recent Reading History'),
             // Recent History List
-            ListView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              itemCount: recentArticles.length,
-              itemBuilder: (context, index) {
-                final article = recentArticles[index];
-                return ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  leading: ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
-                    child: Image.network(article.imageUrl, width: 48, height: 48, fit: BoxFit.cover),
-                  ),
-                  title: Text(
-                    article.title,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
-                  ),
-                  subtitle: Text(
-                    'Read ${index + 1}h ago • ${article.category}',
-                    style: TextStyle(
-                      fontSize: 11,
-                      color: isDark ? AppColors.darkTextMuted : AppColors.lightTextMuted,
+            if (authState.isGuest)
+              const Padding(
+                padding: EdgeInsets.all(24.0),
+                child: Text(
+                  'Reading history tracking requires a signed-in account.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: Colors.grey, fontSize: 13),
+                ),
+              )
+            else
+              ListView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                itemCount: recentArticles.length,
+                itemBuilder: (context, index) {
+                  final article = recentArticles[index];
+                  return ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: Image.network(article.imageUrl, width: 48, height: 48, fit: BoxFit.cover),
                     ),
-                  ),
-                );
-              },
-            ),
+                    title: Text(
+                      article.title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
+                    ),
+                    subtitle: Text(
+                      'Read ${index + 1}h ago • ${article.category}',
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: isDark ? AppColors.darkTextMuted : AppColors.lightTextMuted,
+                      ),
+                    ),
+                  );
+                },
+              ),
           ],
         ),
       ),

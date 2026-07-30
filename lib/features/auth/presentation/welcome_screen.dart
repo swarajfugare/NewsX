@@ -29,14 +29,21 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
     super.dispose();
   }
 
-  void _navigateToInterests() {
-    if (mounted) context.go(RouteNames.interests);
+  void _navigateToHome() {
+    if (mounted) context.go(RouteNames.home);
   }
 
   Future<void> _handleGoogleSignIn() async {
     final success = await ref.read(authProvider.notifier).signInWithGoogle();
     if (success && mounted) {
-      _navigateToInterests();
+      _navigateToHome();
+    }
+  }
+
+  Future<void> _handleGuestSignIn() async {
+    await ref.read(authProvider.notifier).signInAsGuest();
+    if (mounted) {
+      _navigateToHome();
     }
   }
 
@@ -112,7 +119,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                       } else {
                         ok = await ref.read(authProvider.notifier).loginWithEmail(email, password);
                       }
-                      if (ok && mounted) _navigateToInterests();
+                      if (ok && mounted) _navigateToHome();
                     },
                   ),
                   const SizedBox(height: 12),
@@ -209,7 +216,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                   CustomButton(
                     label: 'Continue as Guest',
                     variant: CustomButtonVariant.gradient,
-                    onPressed: () => _navigateToInterests(),
+                    onPressed: authState.isLoading ? null : _handleGuestSignIn,
                   ),
                 ],
               ).animate().fadeIn(delay: 400.ms).slideY(begin: 0.3, end: 0),
